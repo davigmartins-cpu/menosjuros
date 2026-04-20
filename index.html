@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MenosJuros — Simule e reduza seu financiamento imobiliário</title>
+<meta name="description" content="A única calculadora que simula pagamentos extras com estratégia — escolha reduzir prazo ou parcela. Economize até R$ 80 mil no seu financiamento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0a1f3c;
+  --navy-mid: #0d2748;
+  --navy-dark: #071628;
+  --navy-border: #1e3a5f;
+  --gold: #C9A84C;
+  --gold-light: #e8c97a;
+  --blue-muted: #7EB8F7;
+  --green: #5DCAA5;
+  --green-dark: #0F3020;
+  --green-border: #1D9E75;
+  --red: #E24B4A;
+  --white: #f0f4f8;
+  --white-dim: #b8cce0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--navy-dark); color: var(--white); line-height: 1.6; }
+h1,h2,h3 { font-family: 'DM Serif Display', serif; font-weight: 400; }
+
+/* NAV */
+nav { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 2.5rem; background: var(--navy); border-bottom: 1px solid var(--navy-border); position: sticky; top: 0; z-index: 100; }
+.logo { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--white); }
+.logo em { color: var(--gold); font-style: normal; }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-link { font-size: 13px; color: var(--blue-muted); text-decoration: none; }
+.nav-link:hover { color: var(--white); }
+.btn-nav { padding: 9px 20px; background: var(--gold); color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-nav:hover { background: var(--gold-light); }
+
+/* PROMO BANNER */
+.promo-banner { background: var(--red); text-align: center; padding: .6rem 1rem; font-size: 13px; font-weight: 500; color: #fff; }
+.promo-banner strong { color: #ffd0d0; }
+
+/* HERO */
+.hero { background: var(--navy); padding: 5rem 2rem 4rem; text-align: center; }
+.badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 4px 14px; border-radius: 20px; letter-spacing: .05em; text-transform: uppercase; }
+.badge-gold { background: var(--gold); color: #fff; }
+.badge-blue { background: var(--navy-border); color: var(--blue-muted); }
+.hero h1 { font-size: 42px; line-height: 1.2; max-width: 620px; margin: 0 auto 1.25rem; color: var(--white); }
+.hero h1 em { color: var(--gold); font-style: normal; }
+.hero-sub { font-size: 16px; color: var(--blue-muted); max-width: 500px; margin: 0 auto 2.5rem; }
+.hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+.btn-primary { padding: 15px 34px; background: var(--gold); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background .2s; }
+.btn-primary:hover { background: var(--gold-light); }
+.btn-secondary { padding: 15px 34px; background: transparent; color: #fff; border: 2px solid var(--blue-muted); border-radius: 8px; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: border-color .2s; }
+.btn-secondary:hover { border-color: var(--white); }
+.hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--navy-border); border: 1px solid var(--navy-border); border-radius: 12px; overflow: hidden; max-width: 520px; margin: 0 auto; }
+.hstat { background: var(--navy-mid); padding: 1.25rem 1rem; text-align: center; }
+.hstat .n { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--gold); }
+.hstat .l { font-size: 12px; color: var(--blue-muted); margin-top: 4px; }
+
+/* UNIQUE STRIP */
+.unique-strip { background: var(--gold); padding: 1rem 2rem; text-align: center; }
+.unique-strip p { font-size: 14px; font-weight: 500; color: #fff; max-width: 640px; margin: 0 auto; }
+.unique-strip strong { color: var(--navy); }
+
+/* SECTION BASE */
+section { padding: 4rem 2rem; }
+.slabel { font-size: 11px; font-weight: 500; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem; text-align: center; }
+section h2 { font-size: 30px; color: var(--white); text-align: center; margin-bottom: .5rem; }
+.ssub { font-size: 15px; color: var(--blue-muted); text-align: center; max-width: 500px; margin: 0 auto 2.5rem; }
+
+/* PAIN */
+.pain { background: var(--navy); }
+.pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.pain-card { background: var(--navy-mid); border: 1px solid var(--navy-border); border-radius: 12px; padding: 1.5rem; }
+.pain-icon { width: 32px; height: 32px; background: var(--navy-border); border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; }
+.pain-card h3 { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: .5rem; }
+.pain-card p { font-size: 13px; color: var(--blue-muted); line-height: 1.55; }
+
+/* HOW */
+.how { background: var(--navy-dark); }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+.step { text-align: center; padding: 1.25rem 1rem; }
+.step-num { width: 40px; height: 40px; background: var(--gold); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; margin: 0 auto 1rem; }
+.step h3 { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: .4rem; }
+.step p { font-size: 13px; color: var(--blue-muted); line-height: 1.5; }
+
+/* PREVIEW */
+.preview { background: var(--navy); }
+.preview-box { background: var(--navy-mid); border: 1px solid var(--navy-border); border-radius: 14px; padding: 1.75rem; max-width: 560px; margin: 0 auto; }
+.prow { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--navy-border); font-size: 14px; }
+.prow:last-of-type { border: none; }
+.prow .k { color: var(--blue-muted); }
+.prow .v { font-weight: 500; color: var(--white); }
+.prow .v.green { color: var(--green); }
+.eco { background: var(--green-dark); border: 1px solid var(--green-border); border-radius: 10px; padding: 1.25rem; margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.eco-item { text-align: center; }
+.eco-item .l { font-size: 12px; color: var(--green); margin-bottom: 4px; }
+.eco-item .v { font-family: 'DM Serif Display', serif; font-size: 24px; color: #9FE1CB; }
+
+/* ROI */
+.roi-section { background: var(--navy-dark); }
+.roi-box { background: var(--navy-mid); border: 2px solid var(--gold); border-radius: 16px; padding: 2.5rem 2rem; max-width: 560px; margin: 0 auto; text-align: center; }
+.roi-box .roi-label { font-size: 11px; font-weight: 500; color: var(--gold); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem; }
+.roi-box h3 { font-size: 22px; color: var(--white); margin-bottom: 1.5rem; line-height: 1.4; }
+.roi-box h3 em { color: var(--gold); font-style: normal; }
+.roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--navy-border); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; }
+.roi-item { background: var(--navy); padding: 1.1rem .75rem; }
+.roi-item .n { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--gold); }
+.roi-item .l { font-size: 11px; color: var(--blue-muted); margin-top: 4px; }
+.roi-note { font-size: 13px; color: var(--blue-muted); line-height: 1.6; }
+
+/* FEATURES */
+.features { background: var(--navy); }
+.feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.feat { background: var(--navy-mid); border: 1px solid var(--navy-border); border-radius: 12px; padding: 1.5rem; }
+.feat.unique { border-color: var(--gold); }
+.feat-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; margin-bottom: .875rem; }
+.feat h3 { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: .4rem; }
+.feat.unique h3 { color: var(--gold); }
+.feat p { font-size: 13px; color: var(--blue-muted); line-height: 1.55; }
+
+/* TESTIMONIALS */
+.testimonials { background: var(--navy-dark); }
+.testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.testi { background: var(--navy-mid); border: 1px solid var(--navy-border); border-radius: 12px; padding: 1.5rem; }
+.stars { color: var(--gold); font-size: 13px; margin-bottom: .75rem; }
+.testi p { font-size: 13px; color: var(--white); font-style: italic; line-height: 1.6; margin-bottom: .875rem; }
+.testi-author { font-size: 12px; color: var(--blue-muted); }
+
+/* PLAN */
+.plan-section { background: var(--navy); }
+.plan-box { background: var(--navy-mid); border: 2px solid var(--gold); border-radius: 16px; padding: 2.5rem 2rem; max-width: 420px; margin: 0 auto; text-align: center; }
+.promo-tag { display: inline-block; background: var(--red); color: #fff; font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 20px; margin-bottom: 1rem; }
+.plan-box h3 { font-size: 22px; color: var(--white); margin-bottom: .5rem; }
+.plan-box .plan-desc { font-size: 14px; color: var(--blue-muted); margin-bottom: 1.25rem; }
+.price-old { font-size: 15px; color: var(--blue-muted); text-decoration: line-through; margin-bottom: .25rem; }
+.price-new { font-family: 'DM Serif Display', serif; font-size: 48px; color: var(--gold); margin-bottom: .25rem; line-height: 1; }
+.price-new span { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--blue-muted); font-weight: 400; }
+.price-period { font-size: 13px; color: var(--blue-muted); margin-bottom: 1.75rem; }
+.plan-items { text-align: left; margin-bottom: 1.5rem; }
+.pi { font-size: 14px; color: var(--white); padding: 7px 0; border-bottom: 1px solid var(--navy-border); display: flex; gap: 10px; align-items: flex-start; }
+.pi:last-child { border: none; }
+.pi::before { content: ""; width: 7px; height: 7px; min-width: 7px; background: var(--green); border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.urgency { font-size: 13px; color: #EF9F27; margin-bottom: 1.25rem; }
+.btn-full { width: 100%; padding: 15px; background: var(--gold); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background .2s; }
+.btn-full:hover { background: var(--gold-light); }
+.guarantee { font-size: 12px; color: var(--blue-muted); margin-top: 1rem; }
+
+/* CTA */
+.cta-section { background: var(--navy-dark); padding: 5rem 2rem; text-align: center; border-top: 1px solid var(--navy-border); }
+.cta-section h2 { font-size: 32px; color: var(--white); margin-bottom: .875rem; }
+.cta-section p { font-size: 15px; color: var(--blue-muted); max-width: 460px; margin: 0 auto 2rem; }
+
+/* FOOTER */
+footer { background: #04101f; padding: 1.75rem 2rem; text-align: center; border-top: 1px solid var(--navy-border); }
+footer p { font-size: 12px; color: #3a5f8a; }
+footer a { color: var(--blue-muted); text-decoration: none; }
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: 28px; }
+  .nav-right .nav-link { display: none; }
+  .hero-stats { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="promo-banner">
+  Oferta de lançamento — <strong>50% de desconto</strong> por tempo limitado
+</div>
+
+<nav>
+  <div class="logo"><em>Menos</em>Juros</div>
+  <div class="nav-right">
+    <a href="#como-funciona" class="nav-link">Como funciona</a>
+    <a href="#plano" class="nav-link">Preço</a>
+    <a href="profissional.html" class="nav-link">Sou corretor</a>
+    <button class="btn-nav" onclick="document.getElementById('plano').scrollIntoView({behavior:'smooth'})">Simular agora</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="badges">
+    <span class="badge badge-gold">Ferramenta exclusiva no Brasil</span>
+    <span class="badge badge-blue">Minha Casa Minha Vida</span>
+  </div>
+  <h1>Descubra quanto você pode <em>economizar</em> no seu financiamento</h1>
+  <p class="hero-sub">A única calculadora que simula aportes extras com estratégia — escolha reduzir prazo ou parcela — e mostra exatamente quando você quita seu imóvel.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="document.getElementById('plano').scrollIntoView({behavior:'smooth'})">Simular meu financiamento</button>
+    <button class="btn-secondary" onclick="document.getElementById('como-funciona').scrollIntoView({behavior:'smooth'})">Ver como funciona</button>
+  </div>
+  <div class="hero-stats">
+    <div class="hstat"><div class="n">R$ 80mil</div><div class="l">economia média em juros</div></div>
+    <div class="hstat"><div class="n">7 anos</div><div class="l">quitação antecipada</div></div>
+    <div class="hstat"><div class="n">2 min</div><div class="l">para simular</div></div>
+  </div>
+</section>
+
+<div class="unique-strip">
+  <p>Pesquisamos todas as calculadoras disponíveis no Brasil. <strong>Nenhuma permite simular aportes extras com escolha de estratégia (prazo ou parcela) em tempo real.</strong> Esta é a única.</p>
+</div>
+
+<section class="pain">
+  <div class="slabel">O problema</div>
+  <h2>Você sabe o que está pagando?</h2>
+  <p class="ssub">A maioria das pessoas assina um contrato de 30 anos sem entender o impacto de cada decisão.</p>
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#7EB8F7" stroke-width="1.2"/><path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="#7EB8F7" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <h3>Parcelas que parecem não acabar</h3>
+      <p>Nos primeiros anos, quase tudo vai para juros — o saldo devedor mal diminui.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#7EB8F7" stroke-width="1.2"/><path d="M8 5v3.5l2 2" stroke="#7EB8F7" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <h3>O banco não te mostra o caminho</h3>
+      <p>Eles explicam a parcela. Nunca mostram o que acontece se você pagar R$ 300 a mais por mês.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="#7EB8F7" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <h3>FGTS sem estratégia</h3>
+      <p>Usar o FGTS no momento errado pode desperdiçar anos de economia. Sem simulação, é impossível saber.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13L6.5 9l3 3L13 5" stroke="#7EB8F7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3>SAC ou Price?</h3>
+      <p>A diferença pode custar — ou economizar — dezenas de milhares de reais ao longo do contrato.</p>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="como-funciona">
+  <div class="slabel">Como funciona</div>
+  <h2>Simples como deveria ser</h2>
+  <p class="ssub">Em três passos você tem um plano completo personalizado.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><h3>Informe seu contrato</h3><p>Valor, taxa, prazo, SAC ou Price.</p></div>
+    <div class="step"><div class="step-num">2</div><h3>Adicione seus aportes</h3><p>FGTS, 13º, mensais — cada um com sua estratégia.</p></div>
+    <div class="step"><div class="step-num">3</div><h3>Veja o resultado</h3><p>Economia em juros, novo prazo e tabela mês a mês.</p></div>
+  </div>
+</section>
+
+<section class="preview">
+  <div class="slabel">Resultado real</div>
+  <h2>Exemplo: financiamento de R$ 300 mil</h2>
+  <p class="ssub">SAC, 30 anos, 10,5% a.a. — com R$ 500/mês de amortização extra a partir do mês 12.</p>
+  <div class="preview-box">
+    <div class="prow"><span class="k">Prazo original</span><span class="v">360 meses (30 anos)</span></div>
+    <div class="prow"><span class="k">Prazo com amortização</span><span class="v green">271 meses (22,5 anos)</span></div>
+    <div class="prow"><span class="k">Juros sem amortização</span><span class="v">R$ 287.400</span></div>
+    <div class="prow"><span class="k">Juros com amortização</span><span class="v green">R$ 198.600</span></div>
+    <div class="eco">
+      <div class="eco-item"><div class="l">Economia em juros</div><div class="v">R$ 88.800</div></div>
+      <div class="eco-item"><div class="l">Anos a menos de dívida</div><div class="v">7,5 anos</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="roi-section">
+  <div class="slabel">Retorno sobre o investimento</div>
+  <h2>R$ 44,90 que valem <em style="color:var(--gold)">R$ 80 mil</em></h2>
+  <p class="ssub">Nenhum investimento te dá esse retorno. E a simulação é feita com seus próprios números.</p>
+  <div class="roi-box">
+    <div class="roi-label">Cálculo do ROI</div>
+    <h3>Você investe <em>R$ 44,90</em> uma vez.<br>A simulação revela em média <em>R$ 80.000</em> em juros que você não vai pagar.</h3>
+    <div class="roi-grid">
+      <div class="roi-item"><div class="n">R$ 44,90</div><div class="l">seu investimento</div></div>
+      <div class="roi-item"><div class="n">R$ 80.000</div><div class="l">economia média</div></div>
+      <div class="roi-item"><div class="n">178.000%</div><div class="l">retorno</div></div>
+    </div>
+    <p class="roi-note">Não é promessa de ganho — é a economia comprovada pela própria simulação com os seus dados. O retorno real depende do valor do financiamento, taxa e estratégia de amortização escolhida.</p>
+  </div>
+</section>
+
+<section class="features">
+  <div class="slabel">Funcionalidades</div>
+  <h2>O que só o MenosJuros oferece</h2>
+  <p class="ssub">Comparamos com todas as alternativas. Este é o diferencial real.</p>
+  <div class="feat-grid">
+    <div class="feat unique">
+      <div class="feat-dot"></div>
+      <h3>Prazo ou parcela — por aporte</h3>
+      <p>Cada amortização extra tem sua própria estratégia. Nenhuma outra ferramenta no Brasil oferece isso.</p>
+    </div>
+    <div class="feat unique">
+      <div class="feat-dot"></div>
+      <h3>Múltiplos aportes simultâneos</h3>
+      <p>FGTS no mês 24, 13º todo dezembro e R$ 300/mês — tudo numa única simulação.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-dot"></div>
+      <h3>SAC e Price comparados</h3>
+      <p>Seus números nos dois sistemas para a decisão certa.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-dot"></div>
+      <h3>Correção pela TR incluída</h3>
+      <p>Simula o efeito real da correção monetária mês a mês.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-dot"></div>
+      <h3>Tabela mês a mês completa</h3>
+      <p>Cada parcela: juros, amortização, extra e saldo devedor.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-dot"></div>
+      <h3>Focado no MCMV</h3>
+      <p>Taxas do Minha Casa Minha Vida pré-configuradas.</p>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="slabel">Depoimentos</div>
+  <h2>Quem já simulou</h2>
+  <p class="ssub">Resultados de quem planejou melhor o financiamento.</p>
+  <div class="testi-grid">
+    <div class="testi"><div class="stars">★★★★★</div><p>"Descobri que pagando R$ 400 a mais por mês vou quitar 8 anos antes. Nunca imaginaria sem a simulação."</p><div class="testi-author">Marcos T. — São Paulo, SP</div></div>
+    <div class="testi"><div class="stars">★★★★★</div><p>"Usei o FGTS no mês certo e economizei mais de R$ 60 mil em juros. A calculadora mostrou exatamente quando valia mais."</p><div class="testi-author">Camila R. — Belo Horizonte, MG</div></div>
+    <div class="testi"><div class="stars">★★★★★</div><p>"Finalmente entendi a diferença entre SAC e Price com meus próprios números. Não me arrependo da escolha."</p><div class="testi-author">Rafael M. — Campinas, SP</div></div>
+  </div>
+</section>
+
+<section class="plan-section" id="plano">
+  <div class="slabel">Oferta de lançamento</div>
+  <h2>Acesso completo por R$ 44,90</h2>
+  <p class="ssub">Preço promocional de lançamento. Acesso vitalício, sem mensalidade.</p>
+  <div class="plan-box">
+    <div class="promo-tag">50% de desconto — lançamento</div>
+    <h3>MenosJuros Comprador</h3>
+    <p class="plan-desc">Para quem está financiando ou planejando financiar um imóvel</p>
+    <div class="price-old">De R$ 89,90</div>
+    <div class="price-new">R$ 44,90 <span>acesso vitalício</span></div>
+    <p class="price-period">Pagamento único · Sem mensalidade · Acesso imediato</p>
+    <div class="plan-items">
+      <div class="pi">Simulador completo SAC e Price</div>
+      <div class="pi">Múltiplos aportes com estratégia individual</div>
+      <div class="pi">Correção pela TR incluída</div>
+      <div class="pi">Exportar PDF do resultado</div>
+      <div class="pi">Tabela mês a mês completa</div>
+      <div class="pi">Acesso vitalício — paga uma vez só</div>
+    </div>
+    <div class="urgency">Oferta por tempo limitado — preço pode voltar a R$ 89,90</div>
+    <button class="btn-full" onclick="alert('Redirecionar para o checkout da Hotmart')">Quero economizar agora</button>
+    <p class="guarantee">7 dias de garantia · Se não gostar, devolvemos 100%</p>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>Seu imóvel merece um plano inteligente</h2>
+  <p>Você está assumindo uma dívida de décadas. Cinco minutos de simulação podem valer R$ 80 mil.</p>
+  <button class="btn-primary" onclick="document.getElementById('plano').scrollIntoView({behavior:'smooth'})">Simular meu financiamento agora</button>
+</section>
+
+<footer>
+  <p>MenosJuros · Simulador de amortização imobiliária · <a href="profissional.html">Plano Profissional</a> · Não é consultoria financeira · Os valores são estimativas para planejamento pessoal</p>
+</footer>
+
+</body>
+</html>
