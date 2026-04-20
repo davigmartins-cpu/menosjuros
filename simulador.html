@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MenosJuros — Simulador de Amortização</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --navy: #0a1f3c;
+  --navy-mid: #0d2748;
+  --navy-dark: #071628;
+  --navy-border: #1e3a5f;
+  --gold: #C9A84C;
+  --gold-light: #e8c97a;
+  --blue-m: #7EB8F7;
+  --blue-light: #B5D4F4;
+  --green: #5DCAA5;
+  --green-dark: #0F3020;
+  --green-border: #1D9E75;
+  --white: #f0f4f8;
+  --white-dim: #b8cce0;
+  --amber: #EF9F27;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--navy-dark); color: var(--white); min-height: 100vh; }
+
+/* NAV */
+nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; background: var(--navy); border-bottom: 1px solid var(--navy-border); }
+.logo { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--white); }
+.logo em { color: var(--gold); font-style: normal; }
+.nav-tag { font-size: 11px; font-weight: 500; color: var(--blue-m); background: var(--navy-border); padding: 3px 10px; border-radius: 10px; }
+
+/* LAYOUT */
+.container { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--white); margin-bottom: .25rem; }
+.page-sub { font-size: 14px; color: var(--blue-m); margin-bottom: 2rem; }
+
+/* CARDS */
+.card { background: var(--navy); border: 1px solid var(--navy-border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; }
+.card-title { font-size: 11px; font-weight: 500; color: var(--gold); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 1.25rem; }
+
+/* SISTEMA TOGGLE */
+.sys-toggle { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--navy-border); border-radius: 10px; overflow: hidden; margin-bottom: 1.25rem; }
+.sys-btn { padding: 10px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 500; background: var(--navy-mid); color: var(--white-dim); border: none; font-family: 'DM Sans', sans-serif; transition: all .15s; }
+.sys-btn.active { background: var(--gold); color: #fff; }
+
+/* GRID */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* FIELDS */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; color: var(--white-dim); }
+.field input, .field select {
+  height: 40px; border: 1px solid var(--navy-border); border-radius: 8px;
+  padding: 0 12px; font-size: 14px; background: var(--navy-mid); color: var(--white);
+  font-family: 'DM Sans', sans-serif; transition: border-color .15s;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--gold); }
+.field input[readonly] { color: var(--blue-m); cursor: default; }
+.hint { font-size: 11px; color: #3a5f8a; margin-top: 2px; }
+
+/* AMORT ROWS */
+.amort-item { background: var(--navy-mid); border: 1px solid var(--navy-border); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+.amort-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 40px; gap: 8px; align-items: end; margin-bottom: 8px; }
+.modal-toggle { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--navy-border); border-radius: 8px; overflow: hidden; }
+.mbtn { padding: 7px; text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; background: var(--navy); color: var(--white-dim); border: none; font-family: 'DM Sans', sans-serif; }
+.mbtn.prazo.active { background: #185FA5; color: #fff; }
+.mbtn.parcela.active { background: #BA7517; color: #fff; }
+.modal-desc { font-size: 11px; color: #3a5f8a; margin-top: 4px; }
+.del-btn { width: 40px; height: 40px; border: 1px solid var(--navy-border); border-radius: 8px; background: var(--navy); color: var(--white-dim); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.del-btn:hover { background: #1f0a0a; color: #F09595; border-color: #F09595; }
+.add-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px dashed var(--navy-border); border-radius: 8px; background: transparent; color: var(--blue-m); cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; margin-top: 4px; transition: all .15s; }
+.add-btn:hover { border-color: var(--gold); color: var(--gold); }
+.empty-note { font-size: 13px; color: #3a5f8a; font-style: italic; padding: 6px 0; }
+
+/* SIMULATE BTN */
+.sim-btn { width: 100%; height: 48px; background: var(--gold); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: .5rem; transition: background .2s; }
+.sim-btn:hover { background: var(--gold-light); }
+
+/* RESULTS */
+#results { display: none; margin-top: 1.5rem; }
+.result-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--white); margin-bottom: 1.25rem; }
+
+/* HERO COMPARE */
+.hero-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--navy-border); border-radius: 14px; overflow: hidden; margin-bottom: 1rem; }
+.hcol { background: var(--navy); padding: 1.5rem; }
+.hcol.hi { background: var(--green-dark); }
+.hcol .ct { font-size: 11px; font-weight: 500; color: var(--white-dim); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 1rem; }
+.hcol.hi .ct { color: var(--green); }
+.hstat { margin-bottom: 1rem; }
+.hstat .lbl { font-size: 12px; color: var(--white-dim); margin-bottom: 3px; }
+.hstat .val { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--white); }
+.hcol.hi .hstat .val { color: #9FE1CB; }
+.hstat .diff { font-size: 12px; color: var(--green); margin-top: 2px; }
+
+/* ECONOMY BANNER */
+.econ-banner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--green-border); border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
+.econ-item { background: var(--green-dark); padding: 1rem; text-align: center; }
+.econ-item .l { font-size: 11px; color: var(--green); margin-bottom: 4px; }
+.econ-item .v { font-family: 'DM Serif Display', serif; font-size: 20px; color: #9FE1CB; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; margin-bottom: 1rem; flex-wrap: wrap; }
+.tab { padding: 7px 16px; border: 1px solid var(--navy-border); border-radius: 8px; font-size: 13px; cursor: pointer; background: var(--navy-mid); color: var(--white-dim); font-family: 'DM Sans', sans-serif; transition: all .15s; }
+.tab.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+
+/* TABLE */
+.tbl-wrap { max-height: 340px; overflow-y: auto; border: 1px solid var(--navy-border); border-radius: 10px; }
+.tbl-wrap::-webkit-scrollbar { width: 6px; }
+.tbl-wrap::-webkit-scrollbar-track { background: var(--navy-mid); }
+.tbl-wrap::-webkit-scrollbar-thumb { background: var(--navy-border); border-radius: 3px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: left; padding: 8px 10px; background: var(--navy-mid); color: var(--white-dim); font-weight: 500; border-bottom: 1px solid var(--navy-border); white-space: nowrap; position: sticky; top: 0; }
+td { padding: 6px 10px; border-bottom: 1px solid var(--navy-border); color: var(--white); white-space: nowrap; }
+tr:last-child td { border: none; }
+tr.hl-prazo td { background: rgba(24, 95, 165, 0.15); }
+tr.hl-parcela td { background: rgba(186, 117, 23, 0.15); }
+tr.hl-quit td { background: rgba(29, 158, 117, 0.1); font-weight: 500; }
+.tbl-legend { display: flex; gap: 16px; margin-top: 8px; }
+.leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--white-dim); }
+.leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+/* PDF BTN */
+.pdf-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: transparent; color: var(--blue-m); border: 1px solid var(--navy-border); border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: 1rem; transition: all .15s; }
+.pdf-btn:hover { border-color: var(--gold); color: var(--gold); }
+.pdf-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ALERT */
+.info-box { background: var(--navy-mid); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: .875rem 1rem; font-size: 13px; color: var(--blue-m); margin-top: .875rem; }
+
+@media (max-width: 600px) {
+  .g2, .g3 { grid-template-columns: 1fr; }
+  .amort-grid { grid-template-columns: 1fr 1fr; }
+  .amort-grid > *:nth-child(3), .amort-grid > *:nth-child(4) { grid-column: span 1; }
+  .amort-grid > *:last-child { grid-column: span 2; }
+  .hero-compare { grid-template-columns: 1fr; }
+  .econ-banner { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><em>Menos</em>Juros</div>
+  <span class="nav-tag">Simulador de amortização</span>
+</nav>
+
+<div class="container">
+  <h1 class="page-title">Simulador de amortização</h1>
+  <p class="page-sub">Informe os dados do seu contrato, adicione seus aportes extras e veja exatamente quanto vai economizar.</p>
+
+  <!-- SISTEMA -->
+  <div class="card">
+    <div class="card-title">Sistema contratado</div>
+    <div class="sys-toggle">
+      <button class="sys-btn active" id="btn-sac" onclick="setSistema('SAC')">SAC — parcelas decrescentes</button>
+      <button class="sys-btn" id="btn-price" onclick="setSistema('Price')">Price — parcelas fixas</button>
+    </div>
+    <div class="g3">
+      <div class="field">
+        <label>Valor do imóvel (R$)</label>
+        <input type="number" id="val-imovel" value="300000" step="1000">
+      </div>
+      <div class="field">
+        <label>Valor de entrada (R$)</label>
+        <input type="number" id="val-entrada" value="60000" step="1000">
+      </div>
+      <div class="field">
+        <label>Valor financiado (R$)</label>
+        <input type="number" id="val-fin" value="240000" readonly>
+        <span class="hint">Calculado automaticamente</span>
+      </div>
+    </div>
+    <div class="g3" style="margin-top:12px">
+      <div class="field">
+        <label>Taxa de juros (% a.a.)</label>
+        <input type="number" id="taxa" value="10.5" step="0.1">
+      </div>
+      <div class="field">
+        <label>Prazo contratado (meses)</label>
+        <input type="number" id="prazo" value="360" min="12" max="420">
+      </div>
+      <div class="field">
+        <label>Correção TR (% a.a.)</label>
+        <input type="number" id="tr" value="2.0" step="0.1">
+        <span class="hint">Média histórica ~2% a.a.</span>
+      </div>
+    </div>
+    <div class="g2" style="margin-top:12px">
+      <div class="field">
+        <label>Seguro mensal (R$)</label>
+        <input type="number" id="seguro" value="120" step="10">
+        <span class="hint">MIP + DFI estimado</span>
+      </div>
+      <div class="field">
+        <label>Taxa adm. mensal (R$)</label>
+        <input type="number" id="tadm" value="25" step="5">
+      </div>
+    </div>
+    <div class="info-box">
+      Minha Casa Minha Vida: taxas entre 4% e 8,16% a.a. conforme faixa de renda. Ajuste a taxa acima para simular.
+    </div>
+  </div>
+
+  <!-- AMORTIZAÇÕES -->
+  <div class="card">
+    <div class="card-title">Amortizações extras</div>
+    <div id="amort-list"></div>
+    <button class="add-btn" onclick="addAmort()">+ Adicionar amortização</button>
+  </div>
+
+  <button class="sim-btn" onclick="calcular()">Simular financiamento</button>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <h2 class="result-title" id="res-title">Resultado</h2>
+
+    <div class="hero-compare">
+      <div class="hcol">
+        <div class="ct" id="col-base">Contratado</div>
+        <div class="hstat"><div class="lbl">Parcela inicial</div><div class="val" id="b-parcela">—</div></div>
+        <div class="hstat"><div class="lbl">Prazo</div><div class="val" id="b-prazo">—</div></div>
+        <div class="hstat"><div class="lbl">Total de juros</div><div class="val" id="b-juros">—</div></div>
+        <div class="hstat"><div class="lbl">Custo total</div><div class="val" id="b-total">—</div></div>
+      </div>
+      <div class="hcol hi">
+        <div class="ct">Com amortizações extras</div>
+        <div class="hstat"><div class="lbl">Parcela inicial</div><div class="val" id="e-parcela">—</div></div>
+        <div class="hstat"><div class="lbl">Prazo</div><div class="val" id="e-prazo">—</div><div class="diff" id="e-prazo-diff"></div></div>
+        <div class="hstat"><div class="lbl">Total de juros</div><div class="val" id="e-juros">—</div><div class="diff" id="e-juros-diff"></div></div>
+        <div class="hstat"><div class="lbl">Custo total</div><div class="val" id="e-total">—</div><div class="diff" id="e-total-diff"></div></div>
+      </div>
+    </div>
+
+    <div class="econ-banner" id="econ-banner" style="display:none">
+      <div class="econ-item"><div class="l">Economia em juros</div><div class="v" id="ec-juros">—</div></div>
+      <div class="econ-item"><div class="l">Meses a menos</div><div class="v" id="ec-meses">—</div></div>
+      <div class="econ-item"><div class="l">Anos a menos</div><div class="v" id="ec-anos">—</div></div>
+      <div class="econ-item"><div class="l">Economia total</div><div class="v" id="ec-total">—</div></div>
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+      <div class="card-title">Tabela de parcelas</div>
+      <div class="tabs">
+        <div class="tab active" id="tab-base" onclick="showTab('base',this)">Contratado</div>
+        <div class="tab" id="tab-extra" onclick="showTab('extra',this)">Com amortizações</div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mês</th><th>Parcela</th><th>Amort.</th><th>Juros</th><th>Extra</th><th>Modalidade</th><th>Saldo devedor</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+      </div>
+      <div class="tbl-legend">
+        <div class="leg"><div class="leg-dot" style="background:rgba(24,95,165,0.5)"></div>Reduz prazo</div>
+        <div class="leg"><div class="leg-dot" style="background:rgba(186,117,23,0.5)"></div>Reduz parcela</div>
+        <div class="leg"><div class="leg-dot" style="background:rgba(29,158,117,0.3)"></div>Quitado</div>
+      </div>
+    </div>
+
+    <button class="pdf-btn" onclick="exportarPDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16v-8M8 12l4 4 4-4M20 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Exportar PDF do resultado
+    </button>
+  </div>
+</div>
+
+<script>
+const fmt = v => 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const el = id => document.getElementById(id);
+let sistema = 'SAC', amortId = 0, tables = {base:[], extra:[]}, activeTab = 'base';
+let lastResult = null;
+
+el('val-imovel').addEventListener('input', atualizaFin);
+el('val-entrada').addEventListener('input', atualizaFin);
+function atualizaFin() {
+  el('val-fin').value = Math.max(0, (parseFloat(el('val-imovel').value)||0) - (parseFloat(el('val-entrada').value)||0));
+}
+
+function setSistema(s) {
+  sistema = s;
+  el('btn-sac').classList.toggle('active', s==='SAC');
+  el('btn-price').classList.toggle('active', s==='Price');
+}
+
+function addAmort(tipo='unica', valor=500, mesIni=1, mesFim=1, modal='prazo') {
+  const id = ++amortId;
+  const div = document.createElement('div');
+  div.className = 'amort-item'; div.id = 'ar-'+id;
+  div.innerHTML = `
+    <div class="amort-grid">
+      <div class="field">
+        <label>Tipo</label>
+        <select id="tipo-${id}" onchange="toggleFim(${id})">
+          <option value="unica" ${tipo==='unica'?'selected':''}>Único (mês específico)</option>
+          <option value="mensal" ${tipo==='mensal'?'selected':''}>Mensal (intervalo)</option>
+          <option value="anual" ${tipo==='anual'?'selected':''}>Anual (ex: todo dezembro)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Valor (R$)</label>
+        <input type="number" id="val-${id}" value="${valor}" step="100" min="0">
+      </div>
+      <div class="field">
+        <label id="li-${id}">Mês</label>
+        <input type="number" id="ini-${id}" value="${mesIni}" min="1" max="420">
+      </div>
+      <div class="field" id="ff-${id}">
+        <label>Até o mês</label>
+        <input type="number" id="fim-${id}" value="${mesFim}" min="1" max="420">
+      </div>
+      <button class="del-btn" onclick="removeAmort(${id})">×</button>
+    </div>
+    <div class="g2" style="align-items:center">
+      <div class="field">
+        <label>Modalidade</label>
+        <div class="modal-toggle">
+          <button class="mbtn prazo ${modal==='prazo'?'active':''}" id="mp-${id}" onclick="setModal(${id},'prazo')">Reduzir prazo</button>
+          <button class="mbtn parcela ${modal==='parcela'?'active':''}" id="mm-${id}" onclick="setModal(${id},'parcela')">Reduzir parcela</button>
+        </div>
+      </div>
+      <div class="modal-desc" id="mh-${id}"></div>
+    </div>`;
+  el('amort-list').appendChild(div);
+  toggleFim(id); setModal(id, modal); updateEmpty();
+}
+
+function setModal(id, m) {
+  el('ar-'+id).dataset.modal = m;
+  el('mp-'+id).classList.toggle('active', m==='prazo');
+  el('mm-'+id).classList.toggle('active', m==='parcela');
+  el('mh-'+id).textContent = m==='prazo'
+    ? 'Mantém a parcela atual. Termina o contrato antes.'
+    : 'Mantém o prazo. Recalcula a parcela para baixo.';
+}
+
+function toggleFim(id) {
+  const t = el('tipo-'+id).value;
+  el('li-'+id).textContent = t==='anual' ? 'Mês do ano (1–12)' : t==='mensal' ? 'Do mês' : 'Mês';
+  el('ff-'+id).style.opacity = t==='mensal' ? '1' : '0.3';
+  el('ff-'+id).style.pointerEvents = t==='mensal' ? 'auto' : 'none';
+}
+
+function removeAmort(id) { const e=el('ar-'+id); if(e) e.remove(); updateEmpty(); }
+
+function updateEmpty() {
+  const list = el('amort-list');
+  const ex = list.querySelector('.empty-note');
+  const rows = list.querySelectorAll('.amort-item[id]');
+  if(!rows.length && !ex) { const p=document.createElement('p'); p.className='empty-note'; p.textContent='Nenhuma amortização extra adicionada.'; list.appendChild(p); }
+  else if(rows.length && ex) ex.remove();
+}
+
+function getRules() {
+  return [...el('amort-list').querySelectorAll('.amort-item[id]')].map(row => {
+    const id = row.id.replace('ar-','');
+    return { tipo:el('tipo-'+id).value, valor:parseFloat(el('val-'+id).value)||0, ini:parseInt(el('ini-'+id).value)||1, fim:parseInt(el('fim-'+id).value)||1, modal:row.dataset.modal||'prazo' };
+  });
+}
+
+function getExtra(rules, mes) {
+  let prazo=0, parcela=0;
+  rules.forEach(r => {
+    let match = false;
+    if(r.tipo==='unica' && mes===r.ini) match=true;
+    else if(r.tipo==='mensal' && mes>=r.ini && mes<=r.fim) match=true;
+    else if(r.tipo==='anual' && mes%12===r.ini%12 && mes>=r.ini) match=true;
+    if(match) { if(r.modal==='prazo') prazo+=r.valor; else parcela+=r.valor; }
+  });
+  return {prazo, parcela, total:prazo+parcela};
+}
+
+function gerar(pv, tm, trm, n, isSAC, rules) {
+  const af_fixo = isSAC ? pv/n : null;
+  const coef_fixo = isSAC ? null : (tm*Math.pow(1+tm,n))/(Math.pow(1+tm,n)-1);
+  let saldo=pv, rows=[], tj=0;
+  for(let i=1;i<=n;i++) {
+    if(saldo<=0.01) break;
+    saldo *= (1+trm);
+    const j = saldo*tm;
+    let am = isSAC ? Math.min(af_fixo, saldo) : Math.min(saldo*coef_fixo - j, saldo);
+    if(am < 0) am = 0;
+    const par = am+j;
+    let exP=0, exM=0;
+    if(rules && rules.length) {
+      const ext = getExtra(rules,i);
+      exP = Math.min(ext.prazo, Math.max(0, saldo-am));
+      exM = Math.min(ext.parcela, Math.max(0, saldo-am-exP));
+    }
+    saldo -= (am+exP+exM);
+    tj += j;
+    const modalLabel = exP>0&&exM>0?'prazo+parcela':exP>0?'prazo':exM>0?'parcela':'';
+    rows.push({mes:i, parcela:+par.toFixed(2), amort:+am.toFixed(2), juros:+j.toFixed(2), extra:+(exP+exM).toFixed(2), exPrazo:+exP.toFixed(2), exParcela:+exM.toFixed(2), modal:modalLabel, saldo:Math.max(0,+saldo.toFixed(2))});
+    if(saldo<=0.01) break;
+  }
+  return {rows, tj:+tj.toFixed(2), meses:rows.length};
+}
+
+function gerarBase(pv, tm, trm, n, isSAC) { return gerar(pv,tm,trm,n,isSAC,null); }
+function gerarExtra(pv, tm, trm, n, isSAC, rules) { return gerar(pv,tm,trm,n,isSAC,rules); }
+
+function showTab(name, btn) {
+  activeTab=name;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable(name);
+}
+
+function renderTable(name) {
+  el('tbl-body').innerHTML = (tables[name]||[]).map(r => {
+    const cls = r.saldo<=0?' class="hl-quit"':r.exPrazo>0&&!r.exParcela?' class="hl-prazo"':r.exParcela>0&&!r.exPrazo?' class="hl-parcela"':r.extra>0?' class="hl-prazo"':'';
+    const mLbl = r.modal==='prazo'?'<span style="color:#7EB8F7;font-size:11px">prazo</span>':r.modal==='parcela'?'<span style="color:#EF9F27;font-size:11px">parcela</span>':r.modal==='prazo+parcela'?'<span style="font-size:11px">ambos</span>':'-';
+    return `<tr${cls}><td>${r.mes}</td><td>${fmt(r.parcela)}</td><td>${fmt(r.amort)}</td><td>${fmt(r.juros)}</td><td>${r.extra>0?'<b>'+fmt(r.extra)+'</b>':'-'}</td><td>${mLbl}</td><td>${r.saldo>0?fmt(r.saldo):'<b style="color:#5DCAA5">Quitado</b>'}</td></tr>`;
+  }).join('');
+}
+
+function calcular() {
+  const pv = parseFloat(el('val-fin').value)||0;
+  const ta = parseFloat(el('taxa').value)||0;
+  const tra = parseFloat(el('tr').value)||0;
+  const n = parseInt(el('prazo').value)||360;
+  const seg = parseFloat(el('seguro').value)||0;
+  const adm = parseFloat(el('tadm').value)||0;
+  if(pv<=0) { alert('Informe o valor financiado.'); return; }
+  const tm = Math.pow(1+ta/100,1/12)-1;
+  const trm = Math.pow(1+tra/100,1/12)-1;
+  const rules = getRules();
+  const isSAC = sistema==='SAC';
+  const base = gerarBase(pv,tm,trm,n,isSAC);
+  const extra = rules.length > 0 ? gerarExtra(pv,tm,trm,n,isSAC,rules) : {rows:base.rows.map(r=>({...r})), tj:base.tj, meses:base.meses};
+  tables = {base:base.rows, extra:extra.rows};
+  const add = seg+adm;
+  el('res-title').textContent = `${sistema} contratado vs ${sistema} com amortizações`;
+  el('col-base').textContent = `Contratado (${sistema})`;
+  el('tab-base').textContent = `Contratado (${sistema})`;
+  el('tab-extra').textContent = 'Com amortizações';
+  const bCusto = base.rows.reduce((s,r)=>s+r.parcela,0)+(add*base.meses);
+  const eCusto = extra.rows.reduce((s,r)=>s+r.parcela+r.extra,0)+(add*extra.meses);
+  el('b-parcela').textContent = fmt(base.rows[0].parcela+add);
+  el('b-prazo').textContent = base.meses+' meses ('+Math.round(base.meses/12*10)/10+' anos)';
+  el('b-juros').textContent = fmt(base.tj);
+  el('b-total').textContent = fmt(bCusto);
+  el('e-parcela').textContent = fmt(extra.rows[0].parcela+add);
+  el('e-prazo').textContent = extra.meses+' meses ('+Math.round(extra.meses/12*10)/10+' anos)';
+  el('e-juros').textContent = fmt(extra.tj);
+  el('e-total').textContent = fmt(eCusto);
+  const dm=base.meses-extra.meses, dj=+(base.tj-extra.tj).toFixed(2), dt=+(bCusto-eCusto).toFixed(2);
+  if(dm>0) el('e-prazo-diff').textContent = '↓ '+dm+' meses a menos';
+  if(dj>0) el('e-juros-diff').textContent = '↓ '+fmt(dj)+' economizados';
+  if(dt>0) el('e-total-diff').textContent = '↓ '+fmt(dt)+' no total';
+  if(rules.length && dj>0) {
+    el('econ-banner').style.display='grid';
+    el('ec-juros').textContent=fmt(dj);
+    el('ec-meses').textContent=dm>0?dm+' meses':'—';
+    el('ec-anos').textContent=dm>0?(dm/12).toFixed(1)+' anos':'—';
+    el('ec-total').textContent=fmt(dt);
+  } else el('econ-banner').style.display='none';
+  lastResult = {sistema, pv, ta, tra, n, seg, adm, rules, base, extra, dm, dj, dt, add};
+  el('results').style.display='block';
+  el('results').scrollIntoView({behavior:'smooth', block:'start'});
+  renderTable(activeTab);
+}
+
+function exportarPDF() {
+  if(!lastResult) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const r = lastResult;
+  const NAVY=[10,31,60], GOLD=[201,168,76], BLUE=[126,184,247], GREEN=[93,202,165], WHITE=[240,244,248];
+  doc.setFillColor(...NAVY); doc.rect(0,0,210,297,'F');
+  doc.setFillColor(...GOLD); doc.rect(0,0,4,297,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(...WHITE);
+  doc.text('MenosJuros',12,20);
+  doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(...BLUE);
+  doc.text('Simulador de Amortização Imobiliária — menosjuro.com.br',12,28);
+  doc.setDrawColor(...GOLD); doc.setLineWidth(0.5); doc.line(12,32,198,32);
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...GOLD);
+  doc.text('Resumo da simulação',12,42);
+  const rows=[
+    ['Sistema',r.sistema],
+    ['Valor financiado',fmt(r.pv)],
+    ['Taxa de juros',r.ta+'% a.a. + TR '+r.tra+'% a.a.'],
+    ['Prazo contratado',r.n+' meses'],
+    ['Prazo sem amortização extra',r.base.meses+' meses'],
+    ['Prazo com amortizações',r.extra.meses+' meses'],
+    ['Juros sem amortização',fmt(r.base.tj)],
+    ['Juros com amortizações',fmt(r.extra.tj)],
+    ['Economia em juros',r.dj>0?fmt(r.dj):'—'],
+    ['Meses a menos',r.dm>0?r.dm+' meses':'—'],
+  ];
+  let y=50;
+  rows.forEach(([k,v],i) => {
+    doc.setFillColor(i%2===0?15:20,i%2===0?39:45,i%2===0?72:80);
+    doc.rect(12,y-5,186,8,'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...BLUE);
+    doc.text(k,16,y);
+    doc.setTextColor(...WHITE); doc.text(v,120,y);
+    y+=9;
+  });
+  if(r.rules.length>0) {
+    y+=6;
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...GOLD);
+    doc.text('Amortizações extras simuladas',12,y); y+=8;
+    r.rules.forEach((rule,i) => {
+      doc.setFillColor(15,39,72); doc.rect(12,y-5,186,8,'F');
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...BLUE);
+      const tipoLabel = rule.tipo==='unica'?'Único mês '+rule.ini:rule.tipo==='mensal'?'Mensal meses '+rule.ini+'–'+rule.fim:'Anual mês '+rule.ini;
+      doc.text(tipoLabel,16,y);
+      doc.setTextColor(...WHITE);
+      doc.text(fmt(rule.valor)+' — '+rule.modal,120,y);
+      y+=9;
+    });
+  }
+  if(r.dj>0) {
+    y+=6;
+    doc.setFillColor(15,48,32); doc.rect(12,y-6,186,22,'F');
+    doc.setDrawColor(...GREEN); doc.rect(12,y-6,186,22,'S');
+    doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(...GREEN);
+    doc.text('Economia total: '+fmt(r.dt),16,y+2);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(159,225,203);
+    doc.text('Redução de '+r.dm+' meses · '+fmt(r.dj)+' em juros economizados',16,y+10);
+    y+=28;
+  }
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(58,95,138);
+  doc.text('MenosJuros · menosjuro.com.br · Valores são estimativas para planejamento pessoal · Não constitui consultoria financeira',12,290);
+  doc.save('menosjuros-simulacao.pdf');
+}
+
+updateEmpty();
+</script>
+</body>
+</html>
