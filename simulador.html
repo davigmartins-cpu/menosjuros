@@ -141,6 +141,21 @@ tr.hl-quit td { background: rgba(29, 158, 117, 0.1); font-weight: 500; }
   .econ-banner { grid-template-columns: 1fr 1fr; }
 }
 </style>
+
+<script>
+(function(){
+  const SENHA = 'menosjuroagora';
+  const CHAVE = 'mj_acesso';
+  if(sessionStorage.getItem(CHAVE) !== SENHA) {
+    const ok = prompt('Digite a senha de acesso:');
+    if(ok !== SENHA) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#071628;font-family:sans-serif;text-align:center;padding:2rem"><div><p style="color:#f0f4f8;font-size:18px;margin-bottom:1rem">Acesso não autorizado.</p><p style="color:#7EB8F7;font-size:14px">Adquira o MenosJuros em <a href="https://menosjuro.com.br" style="color:#C9A84C">menosjuro.com.br</a></p></div></div>';
+      throw new Error('Acesso negado');
+    }
+    sessionStorage.setItem(CHAVE, SENHA);
+  }
+})();
+</script>
 </head>
 <body>
 
